@@ -1,0 +1,3 @@
+﻿Amaç:
+client server arasında asenkron olarak mesaj göndermek.
+kurallar: eğer bir client 1 sn de 1 den fazla mesaj gönderirse ilkinde uyarı alacak, ikincisinde bağlantı koparılacak.
