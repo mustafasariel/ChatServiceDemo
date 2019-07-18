@@ -17,7 +17,7 @@ namespace ServerDemo
         int maxConnectionCount;
 
 
-        List<Client> ListClients = new List<Client>();
+        public List<Client> ListClients = new List<Client>();
 
 
         public Listener(int port,int maxConnectionCount)
@@ -49,7 +49,13 @@ namespace ServerDemo
 
         private void MessageReceived(ClientServerMessage msg)
         {
-            Console.WriteLine($"{msg.UserName} {msg.Message}");
+            Console.WriteLine($"{msg.UserName} - {msg.Message}");
+
+            Console.WriteLine("Client Listesi");
+            foreach (var item in ListClients)
+            {
+                Console.WriteLine(item.ToString());
+            }
         }
     }
 }

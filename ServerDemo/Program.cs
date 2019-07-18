@@ -10,6 +10,21 @@ namespace ServerDemo
     {
         static void Main(string[] args)
         {
+          
+            Console.WriteLine("Server Dinlemede");
+
+            Listener listener = new Listener(11000, 10);
+
+            listener.Start();
+
+
+            
+
+            Console.ReadLine();
+
+
+            
+
         }
     }
 }
