@@ -1,4 +1,4 @@
-﻿using ChatServiceCore;
+﻿
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,71 +13,69 @@ namespace ClientDemo
 {
     public class Client
     {
-        Socket socket;
-        SocketError socketError;
-        IPEndPoint iPEndPoint;
+        private const int PORT = 100;
+        private readonly Socket ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-        byte[] buffer = new byte[1024];
-
-        public Client(IPEndPoint iPEndPoint)
+        public bool ConnectedServer
         {
-            this.iPEndPoint = iPEndPoint;
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        }
-        public void Start()
-        {
-            socket.BeginConnect(iPEndPoint, onBeginConnect, null); // !!! state parametresini kullanmak bir seçenek olabilir
-
-        }
-
-        private void onBeginConnect(IAsyncResult ar)
-        {
-            socket.EndConnect(ar);
-            socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, onBeginReceive, null);
-
-        }
-
-        private void onBeginReceive(IAsyncResult ar)
-        {
-            int dataLenght = socket.EndReceive(ar, out socketError);
-
-            if (dataLenght <= 0 || socketError != SocketError.Success)
+            get
             {
-                Console.WriteLine("Bağlantı koptu");
-                return;
+                return ClientSocket.Connected;
             }
-            socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, onBeginReceive, null);
         }
-
-        public void Send(ClientServerMessage message)
+        public void ConnectToServer()
         {
-            using (var ms = new MemoryStream())
+
+            while (!ClientSocket.Connected)
             {
-                new BinaryFormatter().Serialize(ms, message);
-                IList<ArraySegment<byte>> data = new List<ArraySegment<byte>>();
-
-                data.Add(new ArraySegment<byte>(ms.ToArray()));
-
-                socket.BeginSend(data, SocketFlags.None, out socketError, sender, null);
-
-                if (socketError != SocketError.Success)
+                try
                 {
-                    Console.WriteLine("Bağlantı koptu");
+                    ClientSocket.Connect(IPAddress.Loopback, PORT);
+                }
+                catch (SocketException)
+                {
+
                 }
             }
         }
 
-        private void sender(IAsyncResult ar)
+
+        public void SendMessage(string text)
         {
-            int dataLenght = socket.EndSend(ar, out socketError);
-            if (dataLenght <= 0 || socketError != SocketError.Success)
+            if (ClientSocket.Connected)
             {
-                Console.WriteLine("Bağlantı koptu");
-                return;
+                byte[] buffer = Encoding.ASCII.GetBytes(text);
+                ClientSocket.Send(buffer, 0, buffer.Length, SocketFlags.None);
             }
-            else
+        }
+
+        public string ReceiveResponse()
+        {
+            try
             {
-                Console.WriteLine($"dataLenght : {dataLenght}");
+                if (ClientSocket.Connected)
+                {
+                    var buffer = new byte[2048];
+                    int received = ClientSocket.Receive(buffer, SocketFlags.None);
+                    if (received == 0)
+                    {
+                        return "";
+                    }
+                    var data = new byte[received];
+                    Array.Copy(buffer, data, received);
+                    string text = Encoding.ASCII.GetString(data);
+
+                    return text;
+                }
+                else
+                {
+                    return "Bağlantı yok";
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return "Bağlantı yok";
             }
 
         }

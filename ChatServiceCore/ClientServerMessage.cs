@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace ChatServiceCore
 {
     /// <summary>
-    /// aynı pc de farklı client üretip username göre ayırt etmek 
+    /// aynı pc e farklı client üretip username göre ayırt etmek 
     /// ve mesajı username ile ilişkilendirmek için.
     /// </summary>
     [Serializable]

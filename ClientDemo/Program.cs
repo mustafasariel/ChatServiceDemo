@@ -4,43 +4,55 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
-using ChatServiceCore;
+using System.Diagnostics;
+using System.Threading;
 
 namespace ClientDemo
 {
+
     class Program
     {
-        static void Main(string[] args)
+        static Client client;
+
+        static void Main()
         {
+            client = new Client();
 
-            Client client = new Client(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 11000));
-
-            client.Start();
-
-            ClientServerMessage message = new ClientServerMessage();
-
-            Console.WriteLine("Usernmame:");
-            message.UserName = Console.ReadLine();
-            Console.WriteLine("Çıkmak için -1 yazınız");
-
-
-            while (true)
+            Console.Title = Process.GetCurrentProcess().ProcessName;
+            client.ConnectToServer();
+            if (client.ConnectedServer)
             {
-                Console.WriteLine("Mesajınız");
-                string mesaj = Console.ReadLine();
-                if (mesaj=="-1")
+                Console.Clear();
+                Console.WriteLine("Connected");
+                int sayac = 0;
+
+                while (sayac < 4)
                 {
-                    Console.WriteLine("Çıkış yaptınız...");
-                    break;
+                    if (client.ConnectedServer)
+                    {
+                        sayac++;
+
+                        client.SendMessage("get time");
+                        Console.WriteLine(client.ReceiveResponse());
+
+                        Thread.Sleep(10);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Server ile bağlantı kapalı");
+                        break;
+                    }
+
                 }
-                else
-                {
-                    message.Message = mesaj;
-                    client.Send(message);
-                }
-                
             }
+            else
+            {
+                Console.WriteLine("Server ile bağlantı kapalı");
+            }
+
             Console.ReadLine();
+
+
         }
     }
 }
