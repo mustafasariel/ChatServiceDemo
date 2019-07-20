@@ -8,7 +8,9 @@ using System.Net;
 
 namespace ServerDemo
 {
-
+    /// <summary>
+    /// Socket ile clienttan gelen komuta göre cevap veren sınıf.
+    /// </summary>
     public class Listener
     {
         private static readonly Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -17,6 +19,13 @@ namespace ServerDemo
         private const int PORT = 100;
         private static readonly byte[] buffer = new byte[BUFFER_SIZE];
 
+        public int ClientCount
+        {
+            get { return clientSockets.Count; }
+        }
+       /// <summary>
+       /// clientların bağlantı taleplerini asenkron olarak dinliyen metot
+       /// </summary>
         public void Start()
         {
             serverSocket.Bind(new IPEndPoint(IPAddress.Any, PORT));
@@ -24,13 +33,13 @@ namespace ServerDemo
             serverSocket.BeginAccept(AcceptCallback, null);
         }
 
-        private void AcceptCallback(IAsyncResult AR)
+        private void AcceptCallback(IAsyncResult asyncResult)
         {
             Socket socket;
 
             try
             {
-                socket = serverSocket.EndAccept(AR);
+                socket = serverSocket.EndAccept(asyncResult);
             }
             catch (ObjectDisposedException)
             {
@@ -41,7 +50,13 @@ namespace ServerDemo
             socket.BeginReceive(buffer, 0, BUFFER_SIZE, SocketFlags.None, ReceiveCallback, socket);
             serverSocket.BeginAccept(AcceptCallback, null);
         }
-
+        /// <summary>
+        /// iş kuralını gerçekleyen metot.
+        /// Kural 1 saniye içinde iki mesaj gönderene uyarı verilecek,
+        /// uyarı sonrası tekrar aynı kuralı ihlal edenin bağlantısı kesilecek.
+        /// </summary>
+        /// <param name="current"></param>
+        /// <returns></returns>
         SocketState BussinesRule(Socket current)
         {
             var cState = clientSockets[current];
@@ -71,11 +86,15 @@ namespace ServerDemo
 
 
         }
-        private void ReceiveCallback(IAsyncResult AR)
+        /// <summary>
+        /// client tarafından gelen mesajı alır ve geriye mesaj veya uyarı döndürür.
+        /// </summary>
+        /// <param name="asyncResult"></param>
+        private void ReceiveCallback(IAsyncResult asyncResult)
         {
             try
             {
-                Socket current = (Socket)AR.AsyncState;
+                Socket current = (Socket)asyncResult.AsyncState;
 
                 var rule = BussinesRule(current);
 
@@ -99,7 +118,7 @@ namespace ServerDemo
 
                 try
                 {
-                    received = current.EndReceive(AR);
+                    received = current.EndReceive(asyncResult);
                 }
                 catch (SocketException)
                 {
@@ -111,16 +130,15 @@ namespace ServerDemo
                 byte[] recBuf = new byte[received];
                 Array.Copy(buffer, recBuf, received);
                 string text = Encoding.ASCII.GetString(recBuf);
-                Console.WriteLine("Received Text: " + text);
 
-                if (text.ToLower() == "get time")
+                if (text.ToLower() == "saatkac")
                 {
                     byte[] data = Encoding.ASCII.GetBytes(DateTime.Now.ToLongTimeString());
                     current.Send(data);
                 }
                 else
                 {
-                    byte[] data = Encoding.ASCII.GetBytes("Invalid request");
+                    byte[] data = Encoding.ASCII.GetBytes("hatali komut");
                     current.Send(data);
                 }
 

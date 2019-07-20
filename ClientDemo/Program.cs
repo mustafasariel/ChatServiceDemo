@@ -14,45 +14,103 @@ namespace ClientDemo
     {
         static Client client;
 
+
+        static void test1()
+        {
+            try
+            {
+
+
+                client = new Client();
+
+                Console.Title = Process.GetCurrentProcess().ProcessName;
+                client.ConnectToServer();
+                if (client.ConnectedServer)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Bağlantı kuruldu");
+                    int sayac = 0;
+
+                    while (sayac < 2)
+                    {
+                        Console.WriteLine($"Bağlantı :{client.ClientSocket.Connected}");
+                        if (client.ClientSocket.Connected)
+                        {
+                            sayac++;
+
+                            client.SendMessage("saatkac");
+                            Console.WriteLine(client.ReceiveResponse());
+
+                            Thread.Sleep(10);
+
+
+                        }
+                        else
+                        {
+                            Console.WriteLine("Server ile bağlantı kapalı");
+                            break;
+                        }
+
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Server ile bağlantı kapalı");
+                }
+
+                Console.ReadLine();
+
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.ToString());
+            }
+        }
         static void Main()
         {
+
+            //test1();
             client = new Client();
-
-            Console.Title = Process.GetCurrentProcess().ProcessName;
             client.ConnectToServer();
-            if (client.ConnectedServer)
+            client.SendMessage("saatkac");
+            Console.WriteLine(client.ReceiveResponse());
+
+            Console.ReadLine();
+            // test2();
+        }
+
+        private static void test2()
+        {
+            Exception beklenen = new System.Net.Sockets.SocketException();
+            Exception sonuc = null;
+            try
             {
-                Console.Clear();
-                Console.WriteLine("Connected");
-                int sayac = 0;
 
-                while (sayac < 4)
+
+                ClientDemo.Client client = new ClientDemo.Client();
+
+
+                client.ConnectToServer();
+
+                for (int i = 0; i < 10; i++)
                 {
-                    if (client.ConnectedServer)
-                    {
-                        sayac++;
 
-                        client.SendMessage("get time");
-                        Console.WriteLine(client.ReceiveResponse());
-
-                        Thread.Sleep(10);
-                    }
-                    else
-                    {
-                        Console.WriteLine("Server ile bağlantı kapalı");
-                        break;
-                    }
+                    client.SendMessage("saatkac");
+                    Thread.Sleep(10);
 
                 }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("Server ile bağlantı kapalı");
+                sonuc = ex;
             }
 
+            if (sonuc.GetType().Name == beklenen.GetType().Name)
+            {
+                Console.WriteLine("beklenen hata oluştu");
+            }
             Console.ReadLine();
-
-
         }
     }
 }

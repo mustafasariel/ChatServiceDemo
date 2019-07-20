@@ -11,10 +11,13 @@ using System.Threading.Tasks;
 
 namespace ClientDemo
 {
+    /// <summary>
+    /// Socket ile servera asenkron olarak mesaj gönderen bir istemciyi temsil ediyor.
+    /// </summary>
     public class Client
     {
         private const int PORT = 100;
-        private readonly Socket ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        public readonly Socket ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
         public bool ConnectedServer
         {
@@ -26,20 +29,23 @@ namespace ClientDemo
         public void ConnectToServer()
         {
 
-            while (!ClientSocket.Connected)
-            {
+            //while (!ClientSocket.Connected)
+            //{
                 try
                 {
                     ClientSocket.Connect(IPAddress.Loopback, PORT);
                 }
-                catch (SocketException)
+                catch (SocketException ex)
                 {
-
+                    Console.WriteLine(ex.Message);
                 }
-            }
+           // }
         }
 
-
+        /// <summary>
+        /// string mesaj gönderen metot
+        /// </summary>
+        /// <param name="text"></param>
         public void SendMessage(string text)
         {
             if (ClientSocket.Connected)
@@ -48,7 +54,10 @@ namespace ClientDemo
                 ClientSocket.Send(buffer, 0, buffer.Length, SocketFlags.None);
             }
         }
-
+        /// <summary>
+        /// serverın verdiği response alan metot
+        /// </summary>
+        /// <returns></returns>
         public string ReceiveResponse()
         {
             try
@@ -74,7 +83,7 @@ namespace ClientDemo
             }
             catch (Exception ex)
             {
-
+               
                 return "Bağlantı yok";
             }
 
