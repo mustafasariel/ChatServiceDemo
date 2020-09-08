@@ -13,7 +13,7 @@ namespace ServerDemo
             Listener listener = new Listener();
             Console.Title = "Server";
             listener.Start();
-            Console.ReadLine();
+          
 
 
             Console.WriteLine($"Bağlı olan Clinet sayısı {listener.ClientCount}");

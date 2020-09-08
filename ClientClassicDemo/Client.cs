@@ -1,19 +1,10 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace ClientDemo
+namespace ClientClassicDemo
 {
-    /// <summary>
-    /// Socket ile servera asenkron olarak mesaj gönderen bir istemciyi temsil ediyor.
-    /// </summary>
     public class Client
     {
         private const int PORT = 7200;
@@ -31,15 +22,15 @@ namespace ClientDemo
 
             //while (!ClientSocket.Connected)
             //{
-                try
-                {
-                    ClientSocket.Connect(IPAddress.Loopback, PORT);
-                }
-                catch (SocketException ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-           // }
+            try
+            {
+                ClientSocket.Connect(IPAddress.Loopback, PORT);
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            // }
         }
 
         /// <summary>
@@ -83,7 +74,7 @@ namespace ClientDemo
             }
             catch (Exception ex)
             {
-               
+
                 return "Bağlantı yok";
             }
 

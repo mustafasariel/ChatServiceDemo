@@ -1,20 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.Sockets;
-using System.Net;
 
-namespace ServerDemo
+namespace ServerDemo2
 {
-    /// <summary>
-    /// Socket ile clienttan gelen komuta göre cevap veren sınıf.
-    /// </summary>
+    class Program
+    {
+        static void Main(string[] args)
+        {
+        }
+    }
+
     public class Listener
     {
         private static readonly Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        private static readonly Dictionary<Socket, SocketStateObj> clientSockets = new Dictionary<Socket, SocketStateObj>();
+        private static readonly Dictionary<string,Socket> clientSockets = new Dictionary<string, Socket>();
         private const int BUFFER_SIZE = 2048;
         private const int PORT = 7200;
         private static readonly byte[] buffer = new byte[BUFFER_SIZE];
@@ -23,9 +27,9 @@ namespace ServerDemo
         {
             get { return clientSockets.Count; }
         }
-       /// <summary>
-       /// clientların bağlantı taleplerini asenkron olarak dinliyen metot
-       /// </summary>
+        /// <summary>
+        /// clientların bağlantı taleplerini asenkron olarak dinliyen metot
+        /// </summary>
         public void Start()
         {
             serverSocket.Bind(new IPEndPoint(IPAddress.Any, PORT));
@@ -46,7 +50,7 @@ namespace ServerDemo
                 return;
             }
 
-            clientSockets.Add(socket, new SocketStateObj());
+            clientSockets.Add("", socket);
             socket.BeginReceive(buffer, 0, BUFFER_SIZE, SocketFlags.None, ReceiveCallback, socket);
             serverSocket.BeginAccept(AcceptCallback, null);
         }
